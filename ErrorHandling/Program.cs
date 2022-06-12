@@ -6,22 +6,14 @@ public static class Program
 {
     public static void Main(string[] args)
     {
-        var variable = "1";
-
         try
         {
+            var variable = "1";
+
             var converted = int.Parse(variable);
 
             Console.WriteLine("Hurray I can add 1 to {0} and get {1}\n", converted, converted + 1);
-        }
-        catch (System.FormatException ex)
-        {
-            Console.WriteLine("cannot conver error: {0}\n", ex.Message);
 
-            Environment.Exit(1);
-        }
-        try
-        {
             var client = new HttpClient();
 
             var response = client.GetAsync("http://worldtimeapi.org/api/ip").Result;
@@ -35,6 +27,12 @@ public static class Program
         catch (HttpRequestException ex)
         {
             Console.WriteLine("cannot get data error {0}", ex.Message);
+
+            Environment.Exit(1);
+        }
+        catch (System.FormatException ex)
+        {
+            Console.WriteLine("cannot conver error: {0}\n", ex.Message);
 
             Environment.Exit(1);
         }
