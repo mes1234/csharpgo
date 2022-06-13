@@ -10,23 +10,25 @@ public static class Program
 
     public static async Task Main(string[] args)
     {
-
         var cts = new CancellationTokenSource();
 
-
         var pub = new Publisher();
-        var sub1 = new Subscriber(pub);
 
+        var sub = new Subscriber(pub);
 
-       var publishTask = Task.Run(() => runPublisher(pub, cts.Token));
+        var publishTask = Task.Run(() => runPublisher(pub, cts.Token));
+
         await Task.Delay(5 * 1000);
+
         cts.Cancel();
 
         await Task.Delay(1 * 1000);
 
+        sub.Dispose();
+
         System.Console.WriteLine("Exiting...");
 
-        Task.WaitAll(new Task[]{publishTask});
+        Task.WaitAll(new Task[] { publishTask });
     }
 
     static async Task runPublisher(Publisher pub, CancellationToken token)
@@ -41,13 +43,11 @@ public static class Program
 
             pub.DoSomething("new very important data sent...");
 
-            await Task.Delay(1000);
+            await Task.Delay(1 * 1000);
 
         }
     }
 }
-
-
 
 class Publisher
 {
@@ -60,20 +60,23 @@ class Publisher
 
     protected virtual void OnRaiseCustomEvent(CustomEventArgs e)
     {
-        var raiseEvent = RaiseCustomEvent;
-
-        raiseEvent(this, e);
+        RaiseCustomEvent(this, e);
     }
 }
 
-class Subscriber
+sealed class Subscriber : IDisposable
 {
     public Subscriber(Publisher pub)
     {
         pub.RaiseCustomEvent += HandleCustomEvent;
     }
 
-    // Define what actions to take when the event is raised.
+    public void Dispose()
+    {
+        System.Console.WriteLine("Time to stop recieving...");
+    }
+
+
     void HandleCustomEvent(object sender, CustomEventArgs e)
     {
         Console.WriteLine($"recieved: \"{e.Message}\"");
