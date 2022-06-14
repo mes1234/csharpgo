@@ -5,35 +5,42 @@ import (
 	"log"
 )
 
-type name string
-
-var ContextName name
-
 func main() {
-	// data := "hello"
-	data := data{
+
+	arr := make([]interface{}, 2)
+
+	arr[0] = "hello"
+
+	arr[1] = data{
 		name: "Bolo",
 	}
-	ctx := context.Background()
 
-	ctx = authorize(data, ctx)
+	for _, item := range arr {
+		ctx := context.Background()
 
-	name := ctx.Value(ContextName)
+		ctx = authorize(item, ctx)
 
-	log.Printf("Name is %s", name)
+		name := ctx.Value("Name")
+
+		log.Printf("Name is %s", name)
+	}
 }
 
 func authorize(i interface{}, ctx context.Context) context.Context {
 
 	val, ok := i.(nameGetter)
 	if ok {
-		newCtx := context.WithValue(ctx, ContextName, val)
-		return newCtx
-	} else {
-		newCtx := context.WithValue(ctx, ContextName, "Undefined")
+		newCtx := context.WithValue(ctx, "Name", val)
 		return newCtx
 	}
 
+	newCtx := context.WithValue(ctx, "Name", "Undefined")
+	return newCtx
+
+}
+
+type nameGetter interface {
+	GetName() string
 }
 
 type data struct {
@@ -42,8 +49,4 @@ type data struct {
 
 func (d data) GetName() string {
 	return d.name
-}
-
-type nameGetter interface {
-	GetName() string
 }
